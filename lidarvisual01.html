@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LIDAR vizualizace</title>
+    <style>
+      body { margin: 0; }
+      canvas { display: block; }
+    </style>
+  </head>
+  <body>
+    <div>
+      <label for="num-layers">Počet vrstev:</label>
+      <input type="number" id="num-layers" name="num-layers" min="1" value="1"><br><br>
+
+      <div id="layer-inputs"></div>
+
+      <label for="max-range">Dosah paprsků:</label>
+      <input type="number" id="max-range" name="max-range" min="1" value="150"><br><br>
+
+      <label for="horizontal-coverage">Horizontální rozlišení:</label>
+      <input type="number" id="horizontal-coverage" name="horizontal-coverage" min="1" max="360" value="20"><br><br>
+
+      <button id="generate-lidar-layers">Generovat</button>
+
+      <div id="layer-colors"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      function createLidarModel(color) {
+        const lidarGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
+        const lidarMaterial = new THREE.MeshBasicMaterial({ color: color });
+        const lidarMesh = new THREE.Mesh(lidarGeometry, lidarMaterial);
+        return lidarMesh;
+      }
+
+      function generateLidarLayers() {
+        const numLayersInput = document.getElementById('num-layers');
+        const numLayers = parseInt(numLayersInput.value);
+
+        const layerInputs = document.getElementById('layer-inputs');
+        const layerColorsDiv = document.getElementById('layer-colors');
+        layerInputs.innerHTML = '';
+        layerColorsDiv.innerHTML = '';
+
+        for (let i = 0; i < numLayers; i++) {
+          const layerInput = document.createElement('div');
+          layerInput.innerHTML = `
+            <label for="layer-range-${i}">Vertikální úhel vrstvy ${i + 1}:</label>
+            <input type="number" id="layer-range-${i}" name="layer-range-${i}" min="-90" max="90" value="0">
+            <label for="layer-color-${i}">Barva vrstvy ${i + 1}:</label>
+            <input type="color" id="layer-color-${i}" name="layer-color-${i}" value="#00ff00"><br><br>
+          `;
+          layerInputs.appendChild(layerInput);
+
+          const layerRangeInput = document.getElementById(`layer-range-${i}`);
+          const layerRange = parseInt(layerRangeInput.value);
+
+          const layerColorInput = document.getElementById(`layer-color-${i}`);
+          const layerColor = layerColorInput.value;
+
+      const layerColors = [];
+
+      function generateLidarLayers() {
+        const numLayersInput = document.getElementById('num-layers');
+        const numLayers = parseInt(numLayersInput.value);
+
+        const layerInputs = document.getElementById('layer-inputs');
+        const layerColorsDiv = document.getElementById('layer-colors');
+        layerInputs.innerHTML = '';
+        layerColorsDiv.innerHTML = '';
+
+        for (let i = 0; i < numLayers; i++) {
+          const layerInput = document.createElement('div');
+          layerInput.innerHTML = `
+            <label for="layer-range-${i}">Vertikální úhel vrstvy ${i + 1}:</label>
+            <input type="number" id="layer-range-${i}" name="layer-range-${i}" min="-90" max="90" value="0">
+            <label for="layer-color-${i}">Barva vrstvy ${i + 1}:</label>
+            <input type="color" id="layer-color-${i}" name="layer-color-${i}" value="#00ff00"><br><br>
+          `;
+          layerInputs.appendChild(layerInput);
+
+          const layerRangeInput = document.getElementById(`layer-range-${i}`);
+          const layerRange = parseInt(layerRangeInput.value);
+
+          const layerColorInput = document.getElementById(`layer-color-${i}`);
+          const layerColor = layerColorInput.value;
+
+          const layerColorDiv = document.createElement('div');
+          layerColorDiv.innerHTML = `Barva vrstvy ${i + 1}: <span style="color: ${layerColor};">${layerColor}</span><br><br>`;
+          layerColorsDiv.appendChild(layerColorDiv);
+
+          layerColors.push({ range: layerRange, color: layerColor });
+
+          const lidarModel = createLidarModel(layerColor);
+          lidarModel.position.y = layerRange;
+          scene.add(lidarModel);
+
+          renderRays(layerRange, layerColor);
+        }
+      }
+
+      camera.position.z = 200;
+
+      document.getElementById('generate-lidar-layers').addEventListener('click', generateLidarLayers);
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        renderer.render(scene, camera);
+      }
+
+      animate();
+    </script>
+  </body>
+</html>
+
